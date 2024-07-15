@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "us-south-1"
 }
 
 # Define the VPC
@@ -101,12 +101,11 @@ resource "aws_route_table" "private" {
   }
 }
 
-# Create routes in the private route table for NAT Gateway
+# Create a single route in the private route table for NAT Gateway
 resource "aws_route" "private" {
-  count                    = min(length(data.aws_availability_zones.available.names), 3)
-  route_table_id           = aws_route_table.private.id
-  destination_cidr_block   = "0.0.0.0/0"
-  nat_gateway_id           = aws_nat_gateway.main[count.index].id
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.main[0].id # Use the first NAT gateway
 }
 
 # Associate the private subnets with the private route table
