@@ -71,46 +71,34 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# Define a NAT Gateway for private subnets
-resource "aws_eip" "nat" {
-  count = min(length(data.aws_availability_zones.available.names), 3)
+# Define Security Group for NodePort services
+resource "aws_security_group" "nodeport_sg" {
+  name        = "nodeport-security-group"
+  description = "Security group for NodePort services"
 
-  domain = "vpc"
-
-  tags = {
-    Name = "nat-eip-${count.index + 1}"
-  }
-}
-
-resource "aws_nat_gateway" "main" {
-  count         = min(length(data.aws_availability_zones.available.names), 3)
-  allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
-
-  tags = {
-    Name = "main-nat-gateway-${count.index + 1}"
-  }
-}
-
-# Define the private route table
-resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main[0].id # Use the first NAT gateway
+  // Ingress rules for NodePort and additional ports
+  ingress {
+    description = "Allow inbound traffic for NodePort service"
+    from_port   = 30500
+    to_port     = 30500  # Adjust to include 8 ports (30500-30507)
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Allow access from anywhere (adjust as needed)
   }
+
+  // Optionally, add more ingress rules for additional ports here if needed
+  // ingress {
+  //   description = "Allow inbound traffic for additional ports"
+  //   from_port   = 80
+  //   to_port     = 80
+  //   protocol    = "tcp"
+  //   cidr_blocks = ["0.0.0.0/0"]
+  // }
 
   tags = {
-    Name = "private-route-table"
+    Name = "nodeport-security-group"
   }
-}
-
-# Associate the private subnets with the private route table
-resource "aws_route_table_association" "private" {
-  count          = min(length(data.aws_availability_zones.available.names), 3)
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private.id
 }
 
 # EKS Cluster Role

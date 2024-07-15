@@ -37,4 +37,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
-  type: LoadBalancer
+  type: NodePort  # Change service type to NodePort
+  externalTrafficPolicy: Cluster  # Optional: controls how the NodePort handles external traffic
+  nodePort: 30500  # Specify the NodePort number
