@@ -75,7 +75,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_eip" "nat" {
   count = min(length(data.aws_availability_zones.available.names), 3)
 
-  vpc = true
+  domain = "vpc"
 
   tags = {
     Name = "nat-eip-${count.index + 1}"
@@ -103,10 +103,10 @@ resource "aws_route_table" "private" {
 
 # Create routes in the private route table for NAT Gateway
 resource "aws_route" "private" {
-  count          = min(length(data.aws_availability_zones.available.names), 3)
-  route_table_id = aws_route_table.private.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id  = aws_nat_gateway.main[count.index].id
+  count                    = min(length(data.aws_availability_zones.available.names), 3)
+  route_table_id           = aws_route_table.private.id
+  destination_cidr_block   = "0.0.0.0/0"
+  nat_gateway_id           = aws_nat_gateway.main[count.index].id
 }
 
 # Associate the private subnets with the private route table
