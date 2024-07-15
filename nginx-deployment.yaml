@@ -38,21 +38,3 @@ spec:
       port: 80
       targetPort: 80
   type: LoadBalancer
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: nginx-html
-data:
-  index.html: |
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>hey Pradeep</title>
-    </head>
-    <body>
-      <h1>Hello, World!</h1>
-      <p>This is a sample web application served by NGINX in an EKS cluster.</p>
-    </body>
-    </html>
