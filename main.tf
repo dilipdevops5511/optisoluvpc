@@ -4,7 +4,7 @@ provider "aws" {
 
 # Include VPC configuration
 module "vpc" {
-  source = "./modules/eks"
+  source = "./modules/vpc"
 }
 
 # Include EKS configuration
