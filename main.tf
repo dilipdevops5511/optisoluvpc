@@ -113,7 +113,7 @@ resource "aws_route_table_association" "public_rta_3" {
 
 # NAT Gateway
 resource "aws_eip" "nat_eip" {
-  vpc = true
+  domain = "vpc"  # Update to use `domain` instead of deprecated `vpc` argument
 }
 
 resource "aws_nat_gateway" "my_nat_gateway" {
@@ -254,9 +254,18 @@ resource "aws_eks_node_group" "my_eks_node_group" {
   cluster_name    = aws_eks_cluster.my_eks_cluster.name
   node_group_name = "my-eks-node-group"
   node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids       = [
+  subnet_ids      = [
     aws_subnet.private_subnet_1.id,
     aws_subnet.private_subnet_2.id,
     aws_subnet.private_subnet_3.id
   ]
+  scaling_config {
+    desired_size = 2  # Set the desired number of nodes
+    max_size     = 3  # Set the maximum number of nodes
+    min_size     = 1  # Set the minimum number of nodes
+  }
+
+  tags = {
+    Name = "my-eks-node-group"
+  }
 }
