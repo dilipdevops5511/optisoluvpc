@@ -85,7 +85,7 @@ resource "aws_security_group" "nodeport_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    description = "Allow inbound traffic for NodePort service"
+    description = "Allow HTTP traffic"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -127,7 +127,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_role_attachment" {
 
 # EKS Cluster
 resource "aws_eks_cluster" "eks_cluster" {
-  name     = "opti-sol-eks"
+  name     = "eks_cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
