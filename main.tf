@@ -154,30 +154,6 @@ resource "aws_route_table_association" "private_rta_3" {
   route_table_id = aws_route_table.private_rt.id
 }
 
-# EKS Cluster
-resource "aws_eks_cluster" "my_eks_cluster" {
-  name     = "my-eks-cluster"
-  role_arn  = aws_iam_role.eks_cluster_role.arn
-  version   = "1.26"  # Specify the EKS version you want to use
-
-  vpc_config {
-    subnet_ids = [
-      aws_subnet.public_subnet_1.id,
-      aws_subnet.public_subnet_2.id,
-      aws_subnet.public_subnet_3.id,
-      aws_subnet.private_subnet_1.id,
-      aws_subnet.private_subnet_2.id,
-      aws_subnet.private_subnet_3.id,
-    ]
-    endpoint_public_access  = true
-    endpoint_private_access = true
-  }
-
-  tags = {
-    Name = "my-eks-cluster"
-  }
-}
-
 # IAM Role for EKS Cluster
 resource "aws_iam_role" "eks_cluster_role" {
   name = "my-eks-cluster-role"
@@ -249,6 +225,31 @@ resource "aws_iam_role_policy_attachment" "eks_sts_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+# EKS Cluster
+resource "aws_eks_cluster" "my_eks_cluster" {
+  name     = "my-eks-cluster"
+  role_arn  = aws_iam_role.eks_cluster_role.arn
+  version   = "1.26"  # Specify the EKS version you want to use
+
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.public_subnet_1.id,
+      aws_subnet.public_subnet_2.id,
+      aws_subnet.public_subnet_3.id,
+      aws_subnet.private_subnet_1.id,
+      aws_subnet.private_subnet_2.id,
+      aws_subnet.private_subnet_3.id,
+    ]
+    security_group_ids  = [aws_security_group.eks_sg.id]
+    endpoint_public_access  = true
+    endpoint_private_access = true
+  }
+
+  tags = {
+    Name = "my-eks-cluster"
+  }
+}
+
 # EKS Node Group
 resource "aws_eks_node_group" "my_eks_node_group" {
   cluster_name    = aws_eks_cluster.my_eks_cluster.name
@@ -290,26 +291,6 @@ resource "aws_security_group" "eks_sg" {
 
   tags = {
     Name = "eks-security-group"
-  }
-}
-
-
-  vpc_config {
-    subnet_ids          = [
-      aws_subnet.public_subnet_1.id,
-      aws_subnet.public_subnet_2.id,
-      aws_subnet.public_subnet_3.id,
-      aws_subnet.private_subnet_1.id,
-      aws_subnet.private_subnet_2.id,
-      aws_subnet.private_subnet_3.id,
-    ]
-    security_group_ids  = [aws_security_group.eks_sg.id]
-    endpoint_public_access  = true
-    endpoint_private_access = true
-  }
-
-  tags = {
-    Name = "my-eks-cluster"
   }
 }
 
