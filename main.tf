@@ -233,8 +233,30 @@ resource "aws_iam_role" "eks_node_role" {
   }
 }
 
-# IAM Policy for EKS Worker Nodes
+# IAM Policies for EKS Worker Nodes
 resource "aws_iam_role_policy_attachment" "eks_node_policy" {
   role      = aws_iam_role.eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+  role      = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_sts_policy" {
+  role      = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# EKS Node Group
+resource "aws_eks_node_group" "my_eks_node_group" {
+  cluster_name    = aws_eks_cluster.my_eks_cluster.name
+  node_group_name = "my-eks-node-group"
+  node_role_arn   = aws_iam_role.eks_node_role.arn
+  subnet_ids       = [
+    aws_subnet.private_subnet_1.id,
+    aws_subnet.private_subnet_2.id,
+    aws_subnet.private_subnet_3.id
+  ]
 }
