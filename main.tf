@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2"  # Change this to your desired region
+  region = "us-east-1"  # Change this to your desired region
 }
 
 # VPC Configuration
@@ -123,7 +123,7 @@ resource "aws_eks_cluster" "my_eks_cluster" {
       aws_subnet.private_subnet_2.id,
       aws_subnet.private_subnet_3.id,
     ]
-    endpoint_public_access = true
+    endpoint_public_access  = true
     endpoint_private_access = true
   }
 
@@ -156,13 +156,13 @@ resource "aws_iam_role" "eks_cluster_role" {
 
 # IAM Policy for EKS Cluster
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
-  role       = aws_iam_role.eks_cluster_role.name
-  policy_arn  = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role      = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_vpc_policy" {
-  role       = aws_iam_role.eks_cluster_role.name
-  policy_arn  = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  role      = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 }
 
 # IAM Role for EKS Worker Nodes
@@ -207,7 +207,7 @@ resource "aws_iam_role_policy_attachment" "eks_sts_policy" {
 resource "aws_eks_node_group" "my_eks_node_group" {
   cluster_name    = aws_eks_cluster.my_eks_cluster.name
   node_group_name = "my-eks-node-group"
-  node_role       = aws_iam_role.eks_node_role.arn
+  node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids       = [
     aws_subnet.public_subnet_1.id,
     aws_subnet.public_subnet_2.id,
