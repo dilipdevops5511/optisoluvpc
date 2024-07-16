@@ -18,11 +18,11 @@ data "aws_availability_zones" "available" {
 
 # Define the public subnets
 resource "aws_subnet" "public" {
-  count                   = min(length(data.aws_availability_zones.available.names), 3)
+  count                   = 3
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   map_public_ip_on_launch = true
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  availability_zone       = element(data.aws_availability_zones.available.names, count.index)
 
   tags = {
     Name = "public-subnet-${count.index + 1}"
@@ -31,10 +31,10 @@ resource "aws_subnet" "public" {
 
 # Define the private subnets
 resource "aws_subnet" "private" {
-  count             = min(length(data.aws_availability_zones.available.names), 3)
+  count             = 3
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 4)
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+  availability_zone = element(data.aws_availability_zones.available.names, count.index)
 
   tags = {
     Name = "private-subnet-${count.index + 1}"
@@ -66,8 +66,8 @@ resource "aws_route_table" "public" {
 
 # Associate the public subnets with the public route table
 resource "aws_route_table_association" "public" {
-  count          = min(length(data.aws_availability_zones.available.names), 3)
-  subnet_id      = aws_subnet.public[count.index].id
+  count          = 3
+  subnet_id      = element(aws_subnet.public.*.id, count.index)
   route_table_id = aws_route_table.public.id
 }
 
@@ -82,6 +82,13 @@ resource "aws_security_group" "nodeport_sg" {
     from_port   = 30000
     to_port     = 32767
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
