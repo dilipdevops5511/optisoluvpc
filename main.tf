@@ -2,7 +2,6 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-#
 # Define the VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -76,26 +75,15 @@ resource "aws_route_table_association" "public" {
 resource "aws_security_group" "nodeport_sg" {
   name        = "nodeport-security-group"
   description = "Security group for NodePort services"
+  vpc_id      = aws_vpc.main.id
 
-  vpc_id = aws_vpc.main.id
-
-  // Ingress rules for NodePort and additional ports
   ingress {
     description = "Allow inbound traffic for NodePort service"
-    from_port   = 30500
-    to_port     = 30500  # Adjust to include 8 ports (30500-30507)
+    from_port   = 30000
+    to_port     = 32767
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow access from anywhere (adjust as needed)
+    cidr_blocks = ["0.0.0.0/0"]
   }
-
-  // Optionally, add more ingress rules for additional ports here if needed
-  // ingress {
-  //   description = "Allow inbound traffic for additional ports"
-  //   from_port   = 80
-  //   to_port     = 80
-  //   protocol    = "tcp"
-  //   cidr_blocks = ["0.0.0.0/0"]
-  // }
 
   tags = {
     Name = "nodeport-security-group"
@@ -107,10 +95,10 @@ resource "aws_iam_role" "eks_cluster_role" {
   name = "eks-cluster-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
       Principal = {
         Service = "eks.amazonaws.com"
       }
@@ -145,10 +133,10 @@ resource "aws_iam_role" "eks_node_group_role" {
   name = "eks-node-group-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
       Principal = {
         Service = "ec2.amazonaws.com"
       }
