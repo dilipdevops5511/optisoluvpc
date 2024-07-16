@@ -26,7 +26,6 @@ resource "aws_subnet" "public_subnet_1" {
   }
 }
 
-
 resource "aws_subnet" "public_subnet_2" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = "10.0.2.0/24"
@@ -269,4 +268,64 @@ resource "aws_eks_node_group" "my_eks_node_group" {
   tags = {
     Name = "my-eks-node-group"
   }
+}
+
+# Security Group for EKS Cluster
+resource "aws_security_group" "eks_sg" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "eks-security-group"
+  }
+}
+
+# Attach Security Group to EKS Cluster
+resource "aws_eks_cluster" "my_eks_cluster" {
+  name     = "my-eks-cluster"
+  role_arn  = aws_iam_role.eks_cluster_role.arn
+  version   = "1.26"  # Specify the EKS version you want to use
+
+  vpc_config {
+    subnet_ids          = [
+      aws_subnet.public_subnet_1.id,
+      aws_subnet.public_subnet_2.id,
+      aws_subnet.public_subnet_3.id,
+      aws_subnet.private_subnet_1.id,
+      aws_subnet.private_subnet_2.id,
+      aws_subnet.private_subnet_3.id,
+    ]
+    security_group_ids  = [aws_security_group.eks_sg.id]
+    endpoint_public_access  = true
+    endpoint_private_access = true
+  }
+
+  tags = {
+    Name = "my-eks-cluster"
+  }
+}
+
+# Security Group Rule for VPC (Optional: If you need this for other resources)
+resource "aws_security_group_rule" "allow_http_from_internet" {
+  type        = "ingress"
+  from_port    = 80
+  to_port      = 80
+  protocol     = "tcp"
+  cidr_blocks  = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.eks_sg.id
+
+  description = "Allow HTTP traffic on port 80"
 }
