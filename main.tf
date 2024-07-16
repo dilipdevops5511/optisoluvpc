@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2"  # Change this to your desired region
+  region = "us-west-2"  
 }
 
 # Data Source for Availability Zones
@@ -113,12 +113,12 @@ resource "aws_route_table_association" "public_rta_3" {
 
 # NAT Gateway
 resource "aws_eip" "nat_eip" {
-  domain = "vpc"  # Update to use `domain` instead of deprecated `vpc` argument
+  domain = "vpc"  
 }
 
 resource "aws_nat_gateway" "my_nat_gateway" {
   allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public_subnet_1.id  # NAT Gateway in the first public subnet
+  subnet_id     = aws_subnet.public_subnet_1.id  
 
   tags = {
     Name = "my-nat-gateway"
@@ -261,9 +261,9 @@ resource "aws_eks_node_group" "my_eks_node_group" {
     aws_subnet.private_subnet_3.id
   ]
   scaling_config {
-    desired_size = 2  # Set the desired number of nodes
-    max_size     = 3  # Set the maximum number of nodes
-    min_size     = 1  # Set the minimum number of nodes
+    desired_size = 2 
+    max_size     = 3  
+    min_size     = 1  
   }
 
   tags = {
