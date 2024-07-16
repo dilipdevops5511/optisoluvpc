@@ -7,7 +7,7 @@ data:
     <!DOCTYPE html>
     <html>
     <head>
-      <title>NGINX Sample Page</title>
+      <title>Optisol Tech Company</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -19,7 +19,7 @@ data:
       </style>
     </head>
     <body>
-      <h1>Welcome to NGINX Sample Page!</h1>
-      <p>This is a sample NGINX page deployed on Kubernetes.</p>
+      <h1>Optisol Tech Company</h1>
+      <p>Hey Pradeep : )...</p>
     </body>
     </html>
