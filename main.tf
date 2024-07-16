@@ -293,11 +293,6 @@ resource "aws_security_group" "eks_sg" {
   }
 }
 
-# Attach Security Group to EKS Cluster
-resource "aws_eks_cluster" "my_eks_cluster" {
-  name     = "my-eks-cluster"
-  role_arn  = aws_iam_role.eks_cluster_role.arn
-  version   = "1.26"  # Specify the EKS version you want to use
 
   vpc_config {
     subnet_ids          = [
