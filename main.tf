@@ -1,6 +1,9 @@
 provider "aws" {
-  region = "us-east-1"  # Change this to your desired region
+  region = "us-west-2"  # Change this to your desired region
 }
+
+# Data Source for Availability Zones
+data "aws_availability_zones" "available" {}
 
 # VPC Configuration
 resource "aws_vpc" "my_vpc" {
@@ -108,6 +111,49 @@ resource "aws_route_table_association" "public_rta_3" {
   route_table_id = aws_route_table.public_rt.id
 }
 
+# NAT Gateway
+resource "aws_eip" "nat_eip" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "my_nat_gateway" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.public_subnet_1.id  # NAT Gateway in the first public subnet
+
+  tags = {
+    Name = "my-nat-gateway"
+  }
+}
+
+# Route Table for Private Subnets
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.my_nat_gateway.id
+  }
+
+  tags = {
+    Name = "private-route-table"
+  }
+}
+
+resource "aws_route_table_association" "private_rta_1" {
+  subnet_id      = aws_subnet.private_subnet_1.id
+  route_table_id = aws_route_table.private_rt.id
+}
+
+resource "aws_route_table_association" "private_rta_2" {
+  subnet_id      = aws_subnet.private_subnet_2.id
+  route_table_id = aws_route_table.private_rt.id
+}
+
+resource "aws_route_table_association" "private_rta_3" {
+  subnet_id      = aws_subnet.private_subnet_3.id
+  route_table_id = aws_route_table.private_rt.id
+}
+
 # EKS Cluster
 resource "aws_eks_cluster" "my_eks_cluster" {
   name     = "my-eks-cluster"
@@ -190,42 +236,5 @@ resource "aws_iam_role" "eks_node_role" {
 # IAM Policy for EKS Worker Nodes
 resource "aws_iam_role_policy_attachment" "eks_node_policy" {
   role      = aws_iam_role.eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
 }
-
-resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
-  role      = aws_iam_role.eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-
-resource "aws_iam_role_policy_attachment" "eks_sts_policy" {
-  role      = aws_iam_role.eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
-
-# EKS Node Group
-resource "aws_eks_node_group" "my_eks_node_group" {
-  cluster_name    = aws_eks_cluster.my_eks_cluster.name
-  node_group_name = "my-eks-node-group"
-  node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids       = [
-    aws_subnet.public_subnet_1.id,
-    aws_subnet.public_subnet_2.id,
-    aws_subnet.public_subnet_3.id,
-    aws_subnet.private_subnet_1.id,
-    aws_subnet.private_subnet_2.id,
-    aws_subnet.private_subnet_3.id,
-  ]
-  scaling_config {
-    desired_size = 2
-    max_size     = 3
-    min_size     = 1
-  }
-
-  tags = {
-    Name = "my-eks-node-group"
-  }
-}
-
-# Data Source for Availability Zones
-data "aws_availability_zones" "available" {}
