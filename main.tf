@@ -20,7 +20,7 @@ data "aws_availability_zones" "available" {
 resource "aws_subnet" "public" {
   count                   = 3
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index * 2)
   map_public_ip_on_launch = true
   availability_zone       = element(data.aws_availability_zones.available.names, count.index)
 
@@ -33,7 +33,7 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   count             = 3
   vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 4)
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index * 2 + 1)
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
 
   tags = {
@@ -81,6 +81,13 @@ resource "aws_security_group" "nodeport_sg" {
     description = "Allow inbound traffic for NodePort service"
     from_port   = 30000
     to_port     = 32767
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "Allow inbound traffic for NodePort service"
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
