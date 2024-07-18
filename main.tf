@@ -2,10 +2,10 @@ provider "aws" {
   region = "ap-south-1"  
 }
 
-# Data Source for Availability Zones
+
 data "aws_availability_zones" "available" {}
 
-# VPC Configuration
+
 resource "aws_vpc" "my_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -15,7 +15,7 @@ resource "aws_vpc" "my_vpc" {
   }
 }
 
-# Public Subnets
+
 resource "aws_subnet" "public_subnet_1" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = "10.0.1.0/24"
@@ -46,7 +46,6 @@ resource "aws_subnet" "public_subnet_3" {
   }
 }
 
-# Private Subnets
 resource "aws_subnet" "private_subnet_1" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = "10.0.10.0/24"
@@ -74,7 +73,7 @@ resource "aws_subnet" "private_subnet_3" {
   }
 }
 
-# Internet Gateway
+
 resource "aws_internet_gateway" "my_igw" {
   vpc_id = aws_vpc.my_vpc.id
   tags = {
@@ -82,7 +81,7 @@ resource "aws_internet_gateway" "my_igw" {
   }
 }
 
-# Route Table for Public Subnets
+
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -111,7 +110,7 @@ resource "aws_route_table_association" "public_rta_3" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# NAT Gateway
+
 resource "aws_eip" "nat_eip" {
   domain = "vpc"  
 }
@@ -125,7 +124,7 @@ resource "aws_nat_gateway" "my_nat_gateway" {
   }
 }
 
-# Route Table for Private Subnets
+
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -154,7 +153,7 @@ resource "aws_route_table_association" "private_rta_3" {
   route_table_id = aws_route_table.private_rt.id
 }
 
-# IAM Role for EKS Cluster
+
 resource "aws_iam_role" "eks_cluster_role" {
   name = "my-eks-cluster-role"
 
@@ -176,7 +175,7 @@ resource "aws_iam_role" "eks_cluster_role" {
   }
 }
 
-# IAM Policy for EKS Cluster
+
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   role      = aws_iam_role.eks_cluster_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
@@ -187,7 +186,7 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 }
 
-# IAM Role for EKS Worker Nodes
+
 resource "aws_iam_role" "eks_node_role" {
   name = "my-eks-node-role"
 
@@ -209,7 +208,7 @@ resource "aws_iam_role" "eks_node_role" {
   }
 }
 
-# IAM Policies for EKS Worker Nodes
+
 resource "aws_iam_role_policy_attachment" "eks_node_policy" {
   role      = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
@@ -225,7 +224,7 @@ resource "aws_iam_role_policy_attachment" "eks_sts_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# EKS Cluster
+
 resource "aws_eks_cluster" "my_eks_cluster" {
   name     = "my-eks-cluster"
   role_arn  = aws_iam_role.eks_cluster_role.arn
@@ -250,7 +249,7 @@ resource "aws_eks_cluster" "my_eks_cluster" {
   }
 }
 
-# EKS Node Group
+
 resource "aws_eks_node_group" "my_eks_node_group" {
   cluster_name    = aws_eks_cluster.my_eks_cluster.name
   node_group_name = "my-eks-node-group"
@@ -271,7 +270,7 @@ resource "aws_eks_node_group" "my_eks_node_group" {
   }
 }
 
-# Security Group for EKS Cluster
+
 resource "aws_security_group" "eks_sg" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -294,7 +293,7 @@ resource "aws_security_group" "eks_sg" {
   }
 }
 
-# Security Group Rule for VPC (Optional: If you need this for other resources)
+
 resource "aws_security_group_rule" "allow_http_from_internet" {
   type        = "ingress"
   from_port    = 80
